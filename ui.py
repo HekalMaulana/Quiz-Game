@@ -28,20 +28,47 @@ class QuizzInterface:
 
         # True Button
         true_image = PhotoImage(file="images/true.png")
-        self.button = Button(image=true_image, highlightthickness=0)
-        self.button.grid(row=2, column=0)
+        self.true_button = Button(image=true_image, highlightthickness=0, command=self.true_button)
+        self.true_button.grid(row=2, column=0)
 
         # False Button
         false_image = PhotoImage(file="images/false.png")
-        self.button = Button(image=false_image, highlightthickness=0)
-        self.button.grid(row=2, column=1)
+        self.false_button = Button(image=false_image, highlightthickness=0, command=self.false_button)
+        self.false_button.grid(row=2, column=1)
 
         self.next_question()
 
         self.window.mainloop()
 
     def next_question(self):
-        question = self.quiz.next_question()
-        self.canvas.itemconfig(self.question_text,
-                               text=question
-                               )
+        self.canvas.config(bg="white")
+        if self.quiz.still_has_questions():
+            question = self.quiz.next_question()
+            self.canvas.itemconfig(self.question_text,
+                                   text=question
+                                   )
+            self.score.config(text=f"Score: {self.quiz.score}")
+        else:
+            self.canvas.itemconfig(
+                                    self.question_text,
+                                    text=f"Congrats you complete the quiz."
+                                    )
+            self.true_button.config(state="disabled")
+            self.false_button.config(state="disabled")
+
+
+    def true_button(self):
+        is_right = self.quiz.check_answer("True")
+        self.give_feedback(is_right)
+
+    def false_button(self):
+        is_right = self.quiz.check_answer("False")
+        self.give_feedback(is_right)
+
+    def give_feedback(self, is_right):
+        self.window.after(1000, self.next_question)
+        if is_right:
+            self.canvas.config(bg="green")
+        else:
+            self.canvas.config(bg="red")
+
